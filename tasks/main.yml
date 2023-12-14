@@ -42,21 +42,12 @@
     state: present
 
 - name: Install Splunk Forwarder Client
+  include_tasks:
+    file: "{{ ansible_os_family }}.yml"
   when: splunk_version_check.stdout != splunk_release
   notify:
     - Enable Splunk Forwarder
     - Clear config for Cloning
-  block:
-
-    - name: Install Splunk Forwarder on Debian
-      include_tasks:
-        file: debian.yml
-      when: ansible_os_family == "Debian"
-
-    - name: Install Splunk Forwarder on RHEL
-      include_tasks:
-        file: rhel.yml
-      when: ansible_os_family == "RedHat"
 
 - name: "Find all directories within $SPLUNK_HOME"
   find:
