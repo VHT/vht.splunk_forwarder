@@ -107,6 +107,13 @@
   when: splunk_forwarder_output_use_tls
   tags: config_copy
 
+- name: Find files to set log permissions
+  find:
+    paths: "{{ splunk_forwarder_logs }}"
+    recurse: true
+    file_type: any
+  register: splunk_log_files
+
 - name: Set logfile permissions
   acl:
     path: "{{ item.path }}"
@@ -116,7 +123,7 @@
     permissions: r
     recursive: true
   become: true
-  with_items: "{{ splunk_forwarder_logs }}"
+  with_items: "{{ splunk_log_files.files }}"
 
 - name: Accept Splunk License
   command: "/opt/splunkforwarder/bin/splunk enable boot-start -systemd-managed 1 -user {{ splunk_forwarder_user }} -group {{ splunk_forwarder_group }} --accept-license --answer-yes --no-prompt"
