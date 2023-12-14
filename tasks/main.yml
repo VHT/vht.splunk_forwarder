@@ -10,6 +10,7 @@
     gid: "{{ splunk_forwarder_gid }}"
     state: present
   tags: splunk_user
+  when: splunk_create_user
 
 - name: Create Splunk user
   user:
@@ -18,6 +19,7 @@
     uid: "{{ splunk_forwarder_uid }}"
     state: present
   tags: splunk_user
+  when: splunk_create_user
 
 - name: Check if Splunk is installed
   stat:
@@ -54,7 +56,7 @@
     file_type: any
     recurse: true
   register: splunk_contents
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunk"
 
 - name: "Recursively change ownership of $SPLUNK_HOME"
   file:
@@ -62,7 +64,7 @@
     owner: "{{ splunk_forwarder_user }}"
     group: "{{ splunk_forwarder_group }}"
   loop: "{{ splunk_contents.files }}"
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunk"
 
 - name: Copy user seeds file
   template:
