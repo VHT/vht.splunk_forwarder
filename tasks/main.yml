@@ -109,7 +109,7 @@
   tags: config_copy
 
 - name: Set logfile permissions
-  ansible.posix.acl:
+  acl:
     path: "{{ item.path }}"
     entity: "{{ splunk_forwarder_user }}"
     state: present
