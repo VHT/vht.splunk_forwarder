@@ -78,6 +78,7 @@ splunk_forwarder_indexer_hostname:
 splunk_forwarder_indexer_notls_port: 9997
 splunk_forwarder_indexer_tls_port: 9998
 splunk_forwarder_output_use_tls: false
+splunk_forwarder_depl_client_phonehome_interval: 60
 # Configure the splunk_forwarder_output_client_cert_path to
 # use Mutual TLS Auth
 splunk_forwarder_output_client_cert_path: ""
