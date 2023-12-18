@@ -3,12 +3,8 @@ defaultGroup = splunk
 disabled = false
 
 [tcpout:splunk]
-{% if splunk_forwarder_output_use_tls %}
-server ={% for indexer in splunk_forwarder_indexer_hostname %} {{ indexer }}:{{ splunk_forwarder_indexer_tls_port }}{% if not loop.last %}, {% endif %} {% endfor %}
-{% else %}
-server ={% for indexer in splunk_forwarder_indexer_hostname %} {{ indexer }}:{{ splunk_forwarder_indexer_notls_port }}{% if not loop.last %}, {% endif %} {% endfor %}
-{% endif %}
+server = {{ splunk_forwarder_indexer_hostname | map('regex_replace', '^(.*)$', '\\1:' + (splunk_forwarder_output_use_tls | ternary(splunk_forwarder_indexer_tls_port, splunk_forwarder_indexer_notls_port)) | string) | join(', ') }}
 disabled = 0
-{% if splunk_forwarder_output_client_cert_path is defined and splunk_forwarder_output_use_tls %}
+{% if splunk_forwarder_output_client_cert_path and splunk_forwarder_output_use_tls %}
 clientCert = {{ splunk_forwarder_output_client_cert_path }}
 {% endif %}
