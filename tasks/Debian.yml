@@ -21,6 +21,9 @@
       apt:
         deb: "/tmp/{{ deb_name }}"
         state: present
+      notify:
+        - Enable Splunk Forwarder
+        - Clear config for Cloning
 
 
 - name: Install Splunk on Debian arm64 Based Systems
@@ -45,3 +48,6 @@
       apt:
         deb: "/tmp/{{ deb_name }}"
         state: present
+      notify:
+          - Enable Splunk Forwarder
+          - Clear config for Cloning

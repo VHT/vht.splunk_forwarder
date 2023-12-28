@@ -46,9 +46,6 @@
 - name: Install Splunk Forwarder Client
   include_tasks: "{{ ansible_os_family }}.yml"
   when: splunk_version_check.stdout != splunk_release
-  notify:
-    - Enable Splunk Forwarder
-    - Clear config for Cloning
 
 - name: "Find all directories within $SPLUNK_HOME"
   find:
