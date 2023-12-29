@@ -21,16 +21,16 @@
 
 - name: Check if Splunk is installed
   ansible.builtin.stat:
-    path: /opt/splunkforwarder/bin/splunk
+    path: "{{ splunk_home }}/bin/splunk"
   register: splunk_installed
 
 - name: Check Splunk Universal Forwarder Version Installed
   ansible.builtin.shell:
     cmd: |
-        if [ -f /opt/splunkforwarder/bin/splunk ]; then
-          /opt/splunkforwarder/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
+        if [ -f {{ splunk_home }}/bin/splunk ]; then
+          {{ splunk_home }}/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
         fi
-    removes: /opt/splunkforwarder/ftr
+    removes: "{{ splunk_home }}/ftr"
   register: splunk_version_check
   become: true
   become_user: "{{ splunk_forwarder_user }}"
@@ -65,45 +65,65 @@
 - name: Copy user seeds file
   ansible.builtin.template:
     src: user-seed.conf.j2
-    dest: /opt/splunkforwarder/etc/system/local/user-seed.conf
+    dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
     mode: 0664
     backup: true
   when: splunk_forwarder_admin_user is defined and splunk_forwarder_admin_pass is defined
   tags: config_copy
+  notify:
+    - restart splunkforwarder
 
 - name: Copy deployment client file
   ansible.builtin.template:
     src: deploymentclient.conf.j2
-    dest: /opt/splunkforwarder/etc/system/local/deploymentclient.conf
+    dest: "{{ splunk_home }}/etc/system/local/deploymentclient.conf"
     mode: 0664
     backup: true
   when: splunk_forwarder_depl_server is defined
   tags: config_copy
+  notify:
+    - restart splunkforwarder
 
 - name: Copy inputs file
   ansible.builtin.template:
     src: inputs.conf.j2
-    dest: /opt/splunkforwarder/etc/system/local/inputs.conf
+    dest: "{{ splunk_home }}/etc/system/local/inputs.conf"
     mode: 0664
     backup: true
   tags: config_copy
+  notify:
+    - restart splunkforwarder
 
 - name: Copy outputs file
   ansible.builtin.template:
     src: outputs.conf.j2
-    dest: /opt/splunkforwarder/etc/system/local/outputs.conf
+    dest: "{{ splunk_home }}/etc/system/local/outputs.conf"
     mode: 0664
     backup: true
   tags: config_copy
+  notify:
+    - restart splunkforwarder
 
 - name: Copy server file
   ansible.builtin.template:
     src: server.conf.j2
-    dest: /opt/splunkforwarder/etc/system/local/server.conf
+    dest: "{{ splunk_home }}/etc/system/local/server.conf"
     mode: 0664
     backup: true
   when: splunk_forwarder_output_use_tls
   tags: config_copy
+  notify:
+    - restart splunkforwarder
+
+- name: Copy splunk-launch configuration file
+  ansible.builtin.template:
+    src: splunk-launch.conf.j2
+    dest: "{{ splunk_home }}/etc/splunk-launch.conf"
+    mode: 0664
+    backup: true
+  tags: config_copy
+  notify:
+    - restart splunkforwarder
 
 - name: Set logfile permissions
   ansible.posix.acl:
@@ -117,5 +137,23 @@
   with_items: "{{ splunk_forwarder_logs }}"
 
 - name: Accept Splunk License
-  ansible.builtin.command: "/opt/splunkforwarder/bin/splunk enable boot-start -systemd-managed 1 -user {{ splunk_forwarder_user }} -group {{ splunk_forwarder_group }} --accept-license --answer-yes --no-prompt"
-  when: not splunk_installed.stat.exists
+  ansible.builtin.file:
+    path: "{{ splunk_home }}/ftr"
+    state: absent
+
+- name: Install systemd unit file
+  ansible.builtin.template:
+    src: splunkforwarder.service.j2
+    dest: /etc/systemd/system/SplunkForwarder.service
+    mode: 0664
+    backup: true
+  tags: config_copy
+  notify:
+    - restart splunkforwarder
+
+- name: Start Splunk Forwarder
+  ansible.builtin.service:
+    name: SplunkForwarder
+    state: started
+    enabled: true
+  tags: config_copy
