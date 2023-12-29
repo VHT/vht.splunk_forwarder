@@ -13,7 +13,7 @@
 
     - name: Set Download URL
       ansible.builtin.set_fact:
-        rpm_url: "{{ splunk_url }}{{ rpm_name }}"
+        rpm_url: "{{ splunk_url }}/{{ rpm_name }}"
 
     - name: Download the Splunk package (Enterprise Linux)
       ansible.builtin.get_url:
@@ -49,7 +49,7 @@
 
     - name: Set Download URL
       ansible.builtin.set_fact:
-        rpm_url: "{{ splunk_url }}{{ rpm_name }}"
+        rpm_url: "{{ splunk_url }}/{{ rpm_name }}"
 
     - name: Download the Splunk package (Enterprise Linux)
       ansible.builtin.get_url:

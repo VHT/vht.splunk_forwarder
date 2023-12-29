@@ -25,15 +25,16 @@
   register: splunk_installed
 
 - name: Check Splunk Universal Forwarder Version Installed
-  # -auth :{{ splunk_forwarder_admin_pass }}
-  ansible.builtin.shell: |
-      set -o pipefail
-      if [ -f /opt/splunkforwarder/bin/splunk ]; then
-        /opt/splunkforwarder/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
-      fi
-  args:
-    executable: /bin/bash
+  ansible.builtin.shell:
+    cmd: |
+        set -o pipefail
+        if [ -f /opt/splunkforwarder/bin/splunk ]; then
+          /opt/splunkforwarder/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
+        fi
+    removes: /opt/splunkforwarder/ftr
   register: splunk_version_check
+  become: true
+  become_user: "{{ splunk_forwarder_user }}"
   changed_when: splunk_version_check.stdout != splunk_release
 
 - name: Install role package dependencies
@@ -43,20 +44,8 @@
 
 - name: Install Splunk Forwarder Client
   when: splunk_version_check.stdout != splunk_release
-  notify:
-    - Enable Splunk Forwarder
-    - Clear config for Cloning
-  block:
-
-    - name: Install Splunk Forwarder on Debian
-      ansible.builtin.include_tasks:
-        file: debian.yml
-      when: ansible_os_family == "Debian"
-
-    - name: Install Splunk Forwarder on RHEL
-      ansible.builtin.include_tasks:
-        file: rhel.yml
-      when: ansible_os_family == "RedHat"
+  ansible.builtin.include_tasks:
+    file: "{{ ansible_os_family }}.yml"
 
 - name: "Find all directories within $SPLUNK_HOME"
   ansible.builtin.find:

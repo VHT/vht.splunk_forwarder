@@ -1,0 +1,18 @@
+---
+- name: Download the Splunk package (Debian/Ubuntu)
+  ansible.builtin.get_url:
+    url: "{{ splunk_forwarder_deb_url }}"
+    dest: "/tmp/{{ splunk_forwarder_deb_name }}"
+    checksum: "{{ splunk_forwarder_hash }}"
+    mode: 0664
+  notify:
+    - Enable Splunk Forwarder
+    - Clear config for Cloning
+
+- name: Install Splunk (Debian/Ubuntu)
+  ansible.builtin.apt:
+    deb: "/tmp/{{ splunk_forwarder_deb_name }}"
+    state: present
+  notify:
+    - Enable Splunk Forwarder
+    - Clear config for Cloning
