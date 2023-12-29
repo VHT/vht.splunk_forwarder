@@ -27,7 +27,6 @@
 - name: Check Splunk Universal Forwarder Version Installed
   ansible.builtin.shell:
     cmd: |
-        set -o pipefail
         if [ -f /opt/splunkforwarder/bin/splunk ]; then
           /opt/splunkforwarder/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
         fi
