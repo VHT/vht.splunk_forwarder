@@ -16,3 +16,9 @@
   notify:
     - Enable Splunk Forwarder
     - Clear config for Cloning
+
+- name: Install awscli as dependency
+  ansible.builtin.apt:
+    name: awscli
+    state: present
+    cache_valid_time: 3600
