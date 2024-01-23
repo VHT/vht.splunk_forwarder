@@ -73,10 +73,20 @@
   notify:
     - restart splunkforwarder
 
+- name: Create deploymentconf dir
+  ansible.builtin.file:
+    path: "{{ splunk_home }}/{{ splunk_deploymentconf_dir }}"
+    state: directory
+    mode: 0775
+    owner: "{{ splunk_forwarder_user }}"
+    group: "{{ splunk_forwarder_group }}"
+  when: splunk_forwarder_depl_server is defined
+  tags: config_copy
+
 - name: Copy deployment client file
   ansible.builtin.template:
     src: deploymentclient.conf.j2
-    dest: "{{ splunk_home }}/etc/system/local/deploymentclient.conf"
+    dest: "{{ splunk_home }}/{{ splunk_deploymentconf_dir }}/deploymentclient.conf"
     mode: 0664
     backup: true
   when: splunk_forwarder_depl_server is defined
