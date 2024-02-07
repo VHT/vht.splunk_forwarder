@@ -19,6 +19,14 @@
     state: present
   tags: splunk_user
 
+- name: Add Splunk user to additional groups
+  ansible.builtin.user:
+    name: "{{ splunk_forwarder_user }}"
+    groups: "{{ splunk_forwarder_additional_groups }}"
+    append: yes
+  tags: splunk_user
+  when: splunk_forwarder_additional_groups | length > 0
+
 - name: Check if Splunk is installed
   ansible.builtin.stat:
     path: "{{ splunk_home }}/bin/splunk"

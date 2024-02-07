@@ -4,6 +4,8 @@ splunk_forwarder_user: "splunkfwd"
 splunk_forwarder_group: "splunkfwd"
 splunk_forwarder_uid: "10011"
 splunk_forwarder_gid: "10011"
+splunk_forwarder_additional_groups:
+  - adm
 building_image: false
 splunk_release: "9.1.0.1"
 splunk_url: "https://download.splunk.com/products/universalforwarder/releases/{{ splunk_release }}/linux"
