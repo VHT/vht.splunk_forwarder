@@ -94,3 +94,4 @@ splunk_forwarder_default_sourcetype: "syslog"
 splunk_forwarder_logs: []
 # splunk_forwarder_admin_user: admin
 # splunk_forwarder_admin_pass: changeme
+splunk_no_new_privileges: false
