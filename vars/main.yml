@@ -1,3 +1,4 @@
-splunk_forwarder_deb_name: "splunkforwarder-{{ splunk_release }}-{{ splunk_forwarder_download[splunk_release]['string'] }}-linux-2.6-{{ (ansible_architecture == 'aarch64') | ternary('armv8', 'amd64') }}.deb"
+---
+splunk_forwarder_deb_name: splunkforwarder-{{ splunk_release }}-{{ splunk_forwarder_download[splunk_release]['string'] }}-linux-2.6-{{ (ansible_architecture == 'aarch64') | ternary('armv8', 'amd64') }}.deb
 splunk_forwarder_hash: "{{ splunk_forwarder_download[splunk_release][(ansible_architecture == 'aarch64') | ternary('arm64', 'amd64') ~ '_deb_hash'] }}"
 splunk_forwarder_deb_url: "{{ splunk_url }}/{{ splunk_forwarder_deb_name }}"

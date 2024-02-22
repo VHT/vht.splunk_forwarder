@@ -1,7 +1,7 @@
 ---
 - name: Check if arm platform is requested for an unsupported Splunk Release Version
-  ansible.builtin.fail: |
-    msg="Exiting.  Splunk for ARM install via Package is only supported on release 9.0.2 or later"
+  ansible.builtin.fail:
+    msg: "\"Exiting.  Splunk for ARM install via Package is only supported on release 9.0.2 or later\"\n"
   when: splunk_release is version('9.0.2', 'lt', version_type='loose')
 
 - name: Create Splunk group
@@ -23,7 +23,7 @@
   ansible.builtin.user:
     name: "{{ splunk_forwarder_user }}"
     groups: "{{ splunk_forwarder_additional_groups }}"
-    append: yes
+    append: true
   tags: splunk_user
   when: splunk_forwarder_additional_groups | length > 0
 
@@ -35,9 +35,10 @@
 - name: Check Splunk Universal Forwarder Version Installed
   ansible.builtin.shell:
     cmd: |
-        if [ -f {{ splunk_home }}/bin/splunk ]; then
-          {{ splunk_home }}/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
-        fi
+      set -eo pipefail
+      if [ -f {{ splunk_home }}/bin/splunk ]; then
+        {{ splunk_home }}/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
+      fi
     removes: "{{ splunk_home }}/ftr"
   register: splunk_version_check
   become: true
@@ -54,7 +55,7 @@
   ansible.builtin.include_tasks:
     file: "{{ ansible_os_family }}.yml"
 
-- name: "Find all directories within $SPLUNK_HOME"
+- name: Find all directories within $SPLUNK_HOME
   ansible.builtin.find:
     path: "{{ splunk_home }}"
     file_type: any
@@ -62,7 +63,7 @@
   register: splunk_contents
   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
 
-- name: "Recursively change ownership of $SPLUNK_HOME"
+- name: Recursively change ownership of $SPLUNK_HOME
   ansible.builtin.file:
     path: "{{ item.path }}"
     owner: "{{ splunk_forwarder_user }}"
@@ -74,7 +75,7 @@
   ansible.builtin.template:
     src: user-seed.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   when: splunk_forwarder_admin_user is defined and splunk_forwarder_admin_pass is defined
   tags: config_copy
@@ -85,7 +86,7 @@
   ansible.builtin.file:
     path: "{{ splunk_home }}/{{ splunk_deploymentconf_dir }}"
     state: directory
-    mode: 0775
+    mode: "0775"
     owner: "{{ splunk_forwarder_user }}"
     group: "{{ splunk_forwarder_group }}"
   when: splunk_forwarder_depl_server is defined
@@ -95,7 +96,7 @@
   ansible.builtin.template:
     src: deploymentclient.conf.j2
     dest: "{{ splunk_home }}/{{ splunk_deploymentconf_dir }}/deploymentclient.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   when: splunk_forwarder_depl_server is defined
   tags: config_copy
@@ -106,7 +107,7 @@
   ansible.builtin.template:
     src: inputs.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/inputs.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:
@@ -116,7 +117,7 @@
   ansible.builtin.template:
     src: outputs.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/outputs.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:
@@ -126,7 +127,7 @@
   ansible.builtin.template:
     src: server.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/server.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   when: splunk_forwarder_output_use_tls
   tags: config_copy
@@ -137,7 +138,7 @@
   ansible.builtin.template:
     src: splunk-launch.conf.j2
     dest: "{{ splunk_home }}/etc/splunk-launch.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:
@@ -170,7 +171,7 @@
   ansible.builtin.template:
     src: splunkforwarder.service.j2
     dest: /etc/systemd/system/SplunkForwarder.service
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:

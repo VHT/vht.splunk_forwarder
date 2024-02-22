@@ -9,18 +9,18 @@
         state: directory
         owner: root
         group: sys
-        mode: 0775
+        mode: "0775"
     - name: Create Files
       ansible.builtin.file:
         path: /var/log/nginx/access.log
         state: touch
         owner: root
         group: sys
-        mode: 0775
+        mode: "0775"
     - name: Create Files
       ansible.builtin.file:
         path: /var/log/nginx/error.log
         state: touch
         owner: root
         group: sys
-        mode: 0775
+        mode: "0775"
