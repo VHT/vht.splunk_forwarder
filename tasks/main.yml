@@ -159,6 +159,13 @@
     path: "{{ splunk_home }}/ftr"
     state: absent
 
+- name: Additional commands to allow Splunk user to run
+  community.general.sudoers:
+    name: splunk-additional-commands
+    state: present
+    user: "{{ splunk_forwarder_user }}"
+    commands: "{{ splunk_forwarder_additional_commands }}"
+
 - name: Install systemd unit file
   ansible.builtin.template:
     src: splunkforwarder.service.j2
