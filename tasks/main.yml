@@ -77,7 +77,6 @@
     dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
     mode: "0664"
     backup: true
-  when: splunk_forwarder_admin_user is defined and splunk_forwarder_admin_pass is defined
   tags: config_copy
   notify:
     - restart splunkforwarder
