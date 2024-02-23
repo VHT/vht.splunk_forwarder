@@ -55,21 +55,21 @@
   ansible.builtin.include_tasks:
     file: "{{ ansible_os_family }}.yml"
 
-- name: Find all directories within $SPLUNK_HOME
-  ansible.builtin.find:
-    path: "{{ splunk_home }}"
-    file_type: any
-    recurse: true
-  register: splunk_contents
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+# - name: Find all directories within $SPLUNK_HOME
+#   ansible.builtin.find:
+#     path: "{{ splunk_home }}"
+#     file_type: any
+#     recurse: true
+#   register: splunk_contents
+#   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
 
-- name: Recursively change ownership of $SPLUNK_HOME
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    owner: "{{ splunk_forwarder_user }}"
-    group: "{{ splunk_forwarder_group }}"
-  loop: "{{ splunk_contents.files }}"
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+# - name: Recursively change ownership of $SPLUNK_HOME
+#   ansible.builtin.file:
+#     path: "{{ item.path }}"
+#     owner: "{{ splunk_forwarder_user }}"
+#     group: "{{ splunk_forwarder_group }}"
+#   loop: "{{ splunk_contents.files }}"
+#   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
 
 - name: Copy user seeds file
   ansible.builtin.template:
