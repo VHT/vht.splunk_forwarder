@@ -10,7 +10,7 @@ Wants=network-online.target
 [Service]
 Type=simple
 Restart=always
-ExecStart=/opt/splunkforwarder/bin/splunk _internal_launch_under_systemd
+ExecStart={{ splunk_home }}/bin/splunk _internal_launch_under_systemd
 KillMode=mixed
 KillSignal=SIGINT
 TimeoutStopSec=360
@@ -23,7 +23,7 @@ User=splunk
 Group=splunk
 NoNewPrivileges={{ splunk_forwarder_no_new_privileges }}
 AmbientCapabilities=CAP_DAC_READ_SEARCH
-ExecStartPre=-/bin/bash -c "chown -R splunk:splunk /opt/splunkforwarder"
+ExecStartPre=-/bin/bash -c "chown -R splunk:splunk {{ splunk_home }}"
 Delegate=true
 CPUShares=1024
 MemoryLimit=8170147840

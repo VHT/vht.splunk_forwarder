@@ -96,3 +96,5 @@ splunk_forwarder_logs: []
 splunk_forwarder_no_new_privileges: false
 splunk_forwarder_additional_commands:
   - /usr/bin/oscap
+splunk_forwarder_python_https_verify: 0
+splunk_forwarder_python_utf8: 1
