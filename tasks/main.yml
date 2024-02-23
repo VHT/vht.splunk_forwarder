@@ -144,16 +144,16 @@
   notify:
     - restart splunkforwarder
 
-- name: Set logfile permissions
-  ansible.posix.acl:
-    path: "{{ item.path }}"
-    entity: "{{ splunk_forwarder_user }}"
-    state: present
-    etype: user
-    permissions: r
-    recursive: true
-  become: true
-  with_items: "{{ splunk_forwarder_logs }}"
+# - name: Set logfile permissions
+#   ansible.posix.acl:
+#     path: "{{ item.path }}"
+#     entity: "{{ splunk_forwarder_user }}"
+#     state: present
+#     etype: user
+#     permissions: r
+#     recursive: true
+#   become: true
+#   with_items: "{{ splunk_forwarder_logs }}"
 
 - name: Accept Splunk License
   ansible.builtin.file:
@@ -167,15 +167,15 @@
     user: "{{ splunk_forwarder_user }}"
     commands: "{{ splunk_forwarder_additional_commands }}"
 
-# - name: Install systemd unit file
-#   ansible.builtin.template:
-#     src: splunkforwarder.service.j2
-#     dest: /etc/systemd/system/SplunkForwarder.service
-#     mode: "0664"
-#     backup: true
-#   tags: config_copy
-#   notify:
-#     - restart splunkforwarder
+- name: Install systemd unit file
+  ansible.builtin.template:
+    src: splunkforwarder.service.j2
+    dest: /etc/systemd/system/SplunkForwarder.service
+    mode: "0664"
+    backup: true
+  tags: config_copy
+  notify:
+    - restart splunkforwarder
 
 - name: Start Splunk Forwarder
   ansible.builtin.service:
