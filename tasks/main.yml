@@ -66,6 +66,14 @@
     - cacert.pem
     - ca.pem
 
+- name: Copy default splunkd.xml config into place
+  ansible.builtin.copy:
+    src: "{{ splunk_home }}/etc/myinstall/splunkd.xml.cfg-default"
+    dest: "{{ splunk_home }}/etc/myinstall/splunkd.xml"
+    mode: "0644"
+    remote_src: true
+  tags: config_copy
+
 # - name: Find all directories within $SPLUNK_HOME
 #   ansible.builtin.find:
 #     path: "{{ splunk_home }}"
@@ -86,7 +94,7 @@
   ansible.builtin.template:
     src: user-seed.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
-    mode: "0664"
+    mode: "0644"
     backup: true
   tags: config_copy
   notify:
