@@ -55,6 +55,17 @@
   ansible.builtin.include_tasks:
     file: "{{ ansible_os_family }}.yml"
 
+- name: Copy default CA and CA cert into palce
+  ansible.builtin.copy:
+    src: "{{ splunk_home }}/etc/auth/{{ item }}.default"
+    dest: "{{ splunk_home }}/etc/auth/{{ item }}"
+    mode: "0664"
+    remote_src: true
+  tags: config_copy
+  loop:
+    - cacert.pem
+    - ca.pem
+
 # - name: Find all directories within $SPLUNK_HOME
 #   ansible.builtin.find:
 #     path: "{{ splunk_home }}"
