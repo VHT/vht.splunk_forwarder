@@ -22,7 +22,7 @@ This role can accept a list of indexers to ["load balance"][splunk_load_balance]
 
 Based on the configuration of the environment variable `splunk_forwarder_output_use_tls`, the Splunk2Splunk (S2S) port used with the provided list of indexers (via `splunk_forwarder_indexer_hostname`) will be set to match the default ports that a Splunk Indexer would use (TCP 9997 for unencrypted, TCP 9998 for TLS encrypted traffic).  The unencrypted S2S port setting can be overriden by specifying a value for `splunk_forwarder_indexer_notls_port`.  Similarly, if you use a non-standard encrypted port for S2S, you can modify `splunk_forwarder_indexer_tls_port` to configure that.
 
-To enable TLS certificate verification, specify a path value for the variable `splunk_forwarder_output_root_ca_path`.  To enable Mutual TLS, you will need to specify a path to a valid certificate for `splunk_forwarder_output_client_cert_path`.  If you are using a different DNS name or IP address for the indexer and still want to verify the certificate, specify the hostname(s) as a list that are on the Indexer(s) S2S certificate as follows: 
+To enable TLS certificate verification, specify a path value for the variable `splunk_forwarder_output_root_ca_path`.  To enable Mutual TLS, you will need to specify a path to a valid certificate for `splunk_forwarder_output_client_cert_path`.  If you are using a different DNS name or IP address for the indexer and still want to verify the certificate, specify the hostname(s) as a list that are on the Indexer(s) S2S certificate as follows:
 
     splunk_forwarder_output_ssl_alt_name:
       - "alt_hostname"
@@ -51,8 +51,9 @@ The following variables must be configured in order for the SplunkForwarder to c
 
 The following variables are examples of what you can configure:
 
-    splunk_forwarder_admin_user:            # Set the administrative user for the forwarder
+    splunk_forwarder_admin_user:            # Set the administrative user for the forwarder (defaults to "splunk")
     splunk_forwarder_admin_pass:            # Set the administrative password for the forwarder
+    splunk_forwarder_admin_pass_hash:       # Set the administrative password hash for the forwarder
     splunk_forwarder_depl_server:           # Set to the URL:Port of your splunk deployment server i.e. "splunk-mgt:8089" (optional)
     splunk_forwarder_indexer_hostname:      # Set to a list of the hostnames of your splunk indexer(s) i.e. "splunk-indexer"
     splunk_forwarder_output_use_tls:        # Set to true then adjust your variables as necessary

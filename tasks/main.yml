@@ -55,29 +55,47 @@
   ansible.builtin.include_tasks:
     file: "{{ ansible_os_family }}.yml"
 
-- name: Find all directories within $SPLUNK_HOME
-  ansible.builtin.find:
-    path: "{{ splunk_home }}"
-    file_type: any
-    recurse: true
-  register: splunk_contents
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+- name: Copy default CA and CA cert into palce
+  ansible.builtin.copy:
+    src: "{{ splunk_home }}/etc/auth/{{ item }}.default"
+    dest: "{{ splunk_home }}/etc/auth/{{ item }}"
+    mode: "0664"
+    remote_src: true
+  tags: config_copy
+  loop:
+    - cacert.pem
+    - ca.pem
 
-- name: Recursively change ownership of $SPLUNK_HOME
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    owner: "{{ splunk_forwarder_user }}"
-    group: "{{ splunk_forwarder_group }}"
-  loop: "{{ splunk_contents.files }}"
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+- name: Copy default splunkd.xml config into place
+  ansible.builtin.copy:
+    src: "{{ splunk_home }}/etc/myinstall/splunkd.xml.cfg-default"
+    dest: "{{ splunk_home }}/etc/myinstall/splunkd.xml"
+    mode: "0644"
+    remote_src: true
+  tags: config_copy
+
+# - name: Find all directories within $SPLUNK_HOME
+#   ansible.builtin.find:
+#     path: "{{ splunk_home }}"
+#     file_type: any
+#     recurse: true
+#   register: splunk_contents
+#   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+
+# - name: Recursively change ownership of $SPLUNK_HOME
+#   ansible.builtin.file:
+#     path: "{{ item.path }}"
+#     owner: "{{ splunk_forwarder_user }}"
+#     group: "{{ splunk_forwarder_group }}"
+#   loop: "{{ splunk_contents.files }}"
+#   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
 
 - name: Copy user seeds file
   ansible.builtin.template:
     src: user-seed.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
-    mode: "0664"
+    mode: "0644"
     backup: true
-  when: splunk_forwarder_admin_user is defined and splunk_forwarder_admin_pass is defined
   tags: config_copy
   notify:
     - restart splunkforwarder
@@ -144,16 +162,16 @@
   notify:
     - restart splunkforwarder
 
-- name: Set logfile permissions
-  ansible.posix.acl:
-    path: "{{ item.path }}"
-    entity: "{{ splunk_forwarder_user }}"
-    state: present
-    etype: user
-    permissions: r
-    recursive: true
-  become: true
-  with_items: "{{ splunk_forwarder_logs }}"
+# - name: Set logfile permissions
+#   ansible.posix.acl:
+#     path: "{{ item.path }}"
+#     entity: "{{ splunk_forwarder_user }}"
+#     state: present
+#     etype: user
+#     permissions: r
+#     recursive: true
+#   become: true
+#   with_items: "{{ splunk_forwarder_logs }}"
 
 - name: Accept Splunk License
   ansible.builtin.file:
