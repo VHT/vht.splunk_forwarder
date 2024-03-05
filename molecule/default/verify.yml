@@ -5,7 +5,7 @@
   vars:
     service_name: SplunkForwarder.service
   vars_files:
-    - "../../defaults/main.yml"
+    - ../../defaults/main.yml
   tasks:
     - name: Get the Groups
       ansible.builtin.getent:

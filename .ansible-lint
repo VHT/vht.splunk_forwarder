@@ -1,6 +1,6 @@
 ---
 skip_list:
-  - '106'
+  - "106"
 
 mock_roles:
   - austincloudguru.splunk_forwarder

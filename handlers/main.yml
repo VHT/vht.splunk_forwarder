@@ -8,6 +8,8 @@
 - name: Clear config for Cloning
   ansible.builtin.command: /opt/splunkforwarder/bin/splunk clone-prep-clear-config
   when: building_image
+  tags:
+    - skip_ansible_lint
 
 - name: Restart Splunk Forwarder
   ansible.builtin.service:

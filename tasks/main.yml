@@ -1,7 +1,7 @@
 ---
 - name: Check if arm platform is requested for an unsupported Splunk Release Version
-  ansible.builtin.fail: |
-    msg="Exiting.  Splunk for ARM install via Package is only supported on release 9.0.2 or later"
+  ansible.builtin.fail:
+    msg: "\"Exiting.  Splunk for ARM install via Package is only supported on release 9.0.2 or later\"\n"
   when: splunk_release is version('9.0.2', 'lt', version_type='loose')
 
 - name: Create Splunk group
@@ -23,7 +23,7 @@
   ansible.builtin.user:
     name: "{{ splunk_forwarder_user }}"
     groups: "{{ splunk_forwarder_additional_groups }}"
-    append: yes
+    append: true
   tags: splunk_user
   when: splunk_forwarder_additional_groups | length > 0
 
@@ -35,9 +35,10 @@
 - name: Check Splunk Universal Forwarder Version Installed
   ansible.builtin.shell:
     cmd: |
-        if [ -f {{ splunk_home }}/bin/splunk ]; then
-          {{ splunk_home }}/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
-        fi
+      set -eo pipefail
+      if [ -f {{ splunk_home }}/bin/splunk ]; then
+        {{ splunk_home }}/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
+      fi
     removes: "{{ splunk_home }}/ftr"
   register: splunk_version_check
   become: true
@@ -54,29 +55,47 @@
   ansible.builtin.include_tasks:
     file: "{{ ansible_os_family }}.yml"
 
-- name: "Find all directories within $SPLUNK_HOME"
-  ansible.builtin.find:
-    path: "{{ splunk_home }}"
-    file_type: any
-    recurse: true
-  register: splunk_contents
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+- name: Copy default CA and CA cert into palce
+  ansible.builtin.copy:
+    src: "{{ splunk_home }}/etc/auth/{{ item }}.default"
+    dest: "{{ splunk_home }}/etc/auth/{{ item }}"
+    mode: "0664"
+    remote_src: true
+  tags: config_copy
+  loop:
+    - cacert.pem
+    - ca.pem
 
-- name: "Recursively change ownership of $SPLUNK_HOME"
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    owner: "{{ splunk_forwarder_user }}"
-    group: "{{ splunk_forwarder_group }}"
-  loop: "{{ splunk_contents.files }}"
-  when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+- name: Copy default splunkd.xml config into place
+  ansible.builtin.copy:
+    src: "{{ splunk_home }}/etc/myinstall/splunkd.xml.cfg-default"
+    dest: "{{ splunk_home }}/etc/myinstall/splunkd.xml"
+    mode: "0644"
+    remote_src: true
+  tags: config_copy
+
+# - name: Find all directories within $SPLUNK_HOME
+#   ansible.builtin.find:
+#     path: "{{ splunk_home }}"
+#     file_type: any
+#     recurse: true
+#   register: splunk_contents
+#   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
+
+# - name: Recursively change ownership of $SPLUNK_HOME
+#   ansible.builtin.file:
+#     path: "{{ item.path }}"
+#     owner: "{{ splunk_forwarder_user }}"
+#     group: "{{ splunk_forwarder_group }}"
+#   loop: "{{ splunk_contents.files }}"
+#   when: not splunk_installed.stat.exists and splunk_forwarder_user != "splunkfwd"
 
 - name: Copy user seeds file
   ansible.builtin.template:
     src: user-seed.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/user-seed.conf"
-    mode: 0664
+    mode: "0644"
     backup: true
-  when: splunk_forwarder_admin_user is defined and splunk_forwarder_admin_pass is defined
   tags: config_copy
   notify:
     - restart splunkforwarder
@@ -85,7 +104,7 @@
   ansible.builtin.file:
     path: "{{ splunk_home }}/{{ splunk_deploymentconf_dir }}"
     state: directory
-    mode: 0775
+    mode: "0775"
     owner: "{{ splunk_forwarder_user }}"
     group: "{{ splunk_forwarder_group }}"
   when: splunk_forwarder_depl_server is defined
@@ -95,7 +114,7 @@
   ansible.builtin.template:
     src: deploymentclient.conf.j2
     dest: "{{ splunk_home }}/{{ splunk_deploymentconf_dir }}/deploymentclient.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   when: splunk_forwarder_depl_server is defined
   tags: config_copy
@@ -106,7 +125,7 @@
   ansible.builtin.template:
     src: inputs.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/inputs.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:
@@ -116,7 +135,7 @@
   ansible.builtin.template:
     src: outputs.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/outputs.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:
@@ -126,7 +145,7 @@
   ansible.builtin.template:
     src: server.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/server.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   when: splunk_forwarder_output_use_tls
   tags: config_copy
@@ -137,33 +156,40 @@
   ansible.builtin.template:
     src: splunk-launch.conf.j2
     dest: "{{ splunk_home }}/etc/splunk-launch.conf"
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:
     - restart splunkforwarder
 
-- name: Set logfile permissions
-  ansible.posix.acl:
-    path: "{{ item.path }}"
-    entity: "{{ splunk_forwarder_user }}"
-    state: present
-    etype: user
-    permissions: r
-    recursive: true
-  become: true
-  with_items: "{{ splunk_forwarder_logs }}"
+# - name: Set logfile permissions
+#   ansible.posix.acl:
+#     path: "{{ item.path }}"
+#     entity: "{{ splunk_forwarder_user }}"
+#     state: present
+#     etype: user
+#     permissions: r
+#     recursive: true
+#   become: true
+#   with_items: "{{ splunk_forwarder_logs }}"
 
 - name: Accept Splunk License
   ansible.builtin.file:
     path: "{{ splunk_home }}/ftr"
     state: absent
 
+- name: Additional commands to allow Splunk user to run
+  community.general.sudoers:
+    name: splunk-additional-commands
+    state: present
+    user: "{{ splunk_forwarder_user }}"
+    commands: "{{ splunk_forwarder_additional_commands }}"
+
 - name: Install systemd unit file
   ansible.builtin.template:
     src: splunkforwarder.service.j2
     dest: /etc/systemd/system/SplunkForwarder.service
-    mode: 0664
+    mode: "0664"
     backup: true
   tags: config_copy
   notify:

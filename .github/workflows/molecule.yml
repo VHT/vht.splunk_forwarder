@@ -1,6 +1,6 @@
 ---
 name: Molecule
-'on':
+on:
   schedule:
     - cron: "0 8 * * *"
   pull_request:
@@ -9,7 +9,7 @@ name: Molecule
 
 defaults:
   run:
-    working-directory: 'ansible-role-splunk-forwarder'
+    working-directory: ansible-role-splunk-forwarder
 
 jobs:
 
@@ -20,12 +20,12 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v3
         with:
-          path: 'ansible-role-splunk-forwarder'
+          path: ansible-role-splunk-forwarder
 
       - name: Set up Python 3.
         uses: actions/setup-python@v3
         with:
-          python-version: '3.x'
+          python-version: 3.x
 
       - name: Install test dependencies.
         run: pip3 install yamllint
@@ -51,12 +51,12 @@ jobs:
       - name: Check out the codebase.
         uses: actions/checkout@v3
         with:
-          path: 'ansible-role-splunk-forwarder'
+          path: ansible-role-splunk-forwarder
 
       - name: Set up Python 3.
         uses: actions/setup-python@v3
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - name: Install test dependencies.
         run: pip3 install -r requirements.txt
@@ -64,6 +64,6 @@ jobs:
       - name: Run Molecule tests.
         run: molecule test
         env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
+          PY_COLORS: "1"
+          ANSIBLE_FORCE_COLOR: "1"
           MOLECULE_DISTRO: ${{ matrix.distro }}
