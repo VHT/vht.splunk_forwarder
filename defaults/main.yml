@@ -72,6 +72,13 @@ splunk_forwarder_download:
     arm64_deb_hash: md5:408333bbf58a7ab234fa3124e84b75aa
     # RPM now uses aarch64 instead of armv8
     arm64_rpm_hash: md5:a0bf2787825391060c8510770364b7a0
+  9.2.1:
+    string: 78803f08aabb
+    amd64_deb_hash: md5:5ee878df96c7ae751748ca3b5c542859
+    amd64_rpm_hash: md5:8666c398b516c978cddfd58b51f09390
+    arm64_deb_hash: md5:a5914fac4d47871a8d2a93ba299b1a05
+    arm64_rpm_hash: md5:d88d46835991e01eefe86e7d73bde8a1
+
 
 splunk_forwarder_indexer_hostname:
   - splunk-hostname1
