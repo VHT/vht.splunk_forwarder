@@ -16,3 +16,8 @@
     name: SplunkForwarder
     state: restarted
   listen: restart splunkforwarder
+
+- name: Reload daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  listen: reload daemon

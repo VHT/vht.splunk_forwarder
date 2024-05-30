@@ -193,6 +193,7 @@
     backup: true
   tags: config_copy
   notify:
+    - reload daemon
     - restart splunkforwarder
 
 - name: Start Splunk Forwarder
