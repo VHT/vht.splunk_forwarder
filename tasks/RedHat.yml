@@ -10,7 +10,6 @@
   ansible.builtin.yum:
     name: /tmp/{{ splunk_forwarder_rpm_name }}
     state: present
-    update_cache: yes
   when: ansible_facts.python.version.major | int < 3
 
 - name: Install Splunk (python3 dnf)
