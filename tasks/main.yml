@@ -133,7 +133,7 @@
 
 - name: Copy outputs file
   ansible.builtin.template:
-    src: outputs.conf.j2
+    src: fix_outputs.conf.j2
     dest: "{{ splunk_home }}/etc/system/local/outputs.conf"
     mode: "0664"
     backup: true
