@@ -1,5 +1,9 @@
 ---
-splunk_forwarder_deb_name: splunkforwarder-{{ splunk_release }}-{{ splunk_forwarder_download[splunk_release]['string'] }}-linux-2.6-{{ (ansible_architecture == 'aarch64') | ternary('armv8', 'amd64') }}.deb
+# Splunk dropped '-2.6' from DEB filenames and changed 'armv8' to 'arm64' starting with 9.4.x
+splunk_forwarder_deb_name: >-
+  splunkforwarder-{{ splunk_release }}-{{ splunk_forwarder_download[splunk_release]['string'] }}-linux-{%
+  if splunk_release is version('9.4.0', '>=') %}{{ (ansible_architecture == 'aarch64') | ternary('arm64', 'amd64') }}{%
+  else %}2.6-{{ (ansible_architecture == 'aarch64') | ternary('armv8', 'amd64') }}{% endif %}.deb
 splunk_forwarder_hash: "{{ splunk_forwarder_download[splunk_release][(ansible_architecture == 'aarch64') | ternary('arm64', 'amd64') ~ '_deb_hash'] }}"
 splunk_forwarder_deb_url: "{{ splunk_url }}/{{ splunk_forwarder_deb_name }}"
 splunk_forwarder_rpm_name: splunkforwarder-{{ splunk_release }}-{{ splunk_forwarder_download[splunk_release]['string'] }}.x86_64.rpm
