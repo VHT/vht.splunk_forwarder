@@ -32,18 +32,37 @@
     path: "{{ splunk_home }}/bin/splunk"
   register: splunk_installed
 
+# Use ansible.builtin.command and keep the output parsing in Jinja -- do not go back
+# to shell.  This task used to pipe `splunk -version` through `tail -1 | cut` under
+# `set -eo pipefail`, but shell tasks run under ansible_shell_executable, which
+# defaults to /bin/sh, and /bin/sh is dash on Debian-family hosts.  There it failed
+# with "set: Illegal option -o pipefail".  The `executable: /bin/bash` that made the
+# pipeline safe was dropped in 241a52b (2023-12-29), and pipefail was later restored
+# by an ansible-lint risky-shell-pipe pass in c7904bc (2024-02-22) without it.
+#
+# Gate on splunk_installed.stat.exists, not on `removes: $SPLUNK_HOME/ftr`.  The ftr
+# marker only exists between the package install and "Accept Splunk License" further
+# down, so on any converged host the module short-circuited and returned the stdout
+# "skipped, since ... does not exist".  That is never equal to splunk_release, so the
+# forwarder was reinstalled on every deploy and this task always reported changed.
+# The short-circuit also hid the dash failure until a deploy died mid-run and left
+# ftr behind, at which point the next run tripped over it.
+#
+# The license flags keep this non-interactive when ftr is still present.
 - name: Check Splunk Universal Forwarder Version Installed
-  ansible.builtin.shell:
-    cmd: |
-      set -eo pipefail
-      if [ -f {{ splunk_home }}/bin/splunk ]; then
-        {{ splunk_home }}/bin/splunk --accept-license --answer-yes -version |tail -1 |cut -d ' ' -f 4
-      fi
-    removes: "{{ splunk_home }}/ftr"
+  ansible.builtin.command:
+    cmd: "{{ splunk_home }}/bin/splunk --accept-license --answer-yes -version"
   register: splunk_version_check
   become: true
   become_user: "{{ splunk_forwarder_user }}"
-  changed_when: splunk_version_check.stdout != splunk_release
+  when: splunk_installed.stat.exists
+  changed_when: false
+
+# Last line of the output looks like "Splunk Universal Forwarder 9.4.11 (build bbcbf19b5450)"
+- name: Record the installed Splunk Universal Forwarder version
+  ansible.builtin.set_fact:
+    splunk_version_installed: "{{ splunk_version_check.stdout_lines[-1].split(' ')[3] }}"
+  when: splunk_installed.stat.exists
 
 - name: Install role package dependencies
   ansible.builtin.package:
@@ -51,7 +70,7 @@
     state: present
 
 - name: Install Splunk Forwarder Client
-  when: splunk_version_check.stdout != splunk_release
+  when: splunk_version_installed != splunk_release
   ansible.builtin.include_tasks:
     file: "{{ ansible_os_family }}.yml"
 

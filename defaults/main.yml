@@ -8,6 +8,8 @@ splunk_forwarder_additional_groups:
   - adm
 building_image: false
 splunk_release: 9.1.0.1
+# Set at runtime from `splunk -version`; stays empty when Splunk is not installed yet
+splunk_version_installed: ""
 splunk_url: https://download.splunk.com/products/universalforwarder/releases/{{ splunk_release }}/linux
 splunk_deploymentconf_dir: etc/system/local
 splunk_forwarder_download:
