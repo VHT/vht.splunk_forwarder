@@ -90,6 +90,12 @@ splunk_forwarder_download:
     amd64_rpm_hash: md5:2e88cfe1069a881b73aad51728f449d5
     arm64_deb_hash: md5:50a19be6bf10e0627dfd60212afd7cca
     arm64_rpm_hash: md5:b61e279532149f8fb04d1c6d4c22aa41
+  9.4.14:
+    string: ef36026efe9c
+    amd64_deb_hash: md5:83dd51c8d8bdb61bbf95f325285b319b
+    amd64_rpm_hash: md5:4b0af28d4c3167fb42e9d04dc5b8518e
+    arm64_deb_hash: md5:178b39c0bd2054777f7aba45af5c465c
+    arm64_rpm_hash: md5:ab15e14ca713dbf9775065d87daff781
 
 
 splunk_forwarder_indexer_hostname:
